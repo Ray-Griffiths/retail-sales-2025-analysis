@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+env/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temp / scratch
+*.tmp
+*.log
+scratch/
+tmp/
+
+# Notes:
+# - Raw data (retail_sales_2025.*) IS tracked as the source of truth.
+# - clean/ and charts/ are tracked as deliverables (reproducible via scripts/).
+#   If you'd rather regenerate them and keep them out of git, uncomment:
+# clean/
+# charts/

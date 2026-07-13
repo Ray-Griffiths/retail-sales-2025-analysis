@@ -1,0 +1,194 @@
+{
+  "kpis": {
+    "total_revenue": 2867273.39,
+    "total_orders": 1970,
+    "avg_order_value": 1455.47,
+    "unique_customers": 396,
+    "avg_units_per_order": 5.98
+  },
+  "region": [
+    {
+      "region": "Kumasi",
+      "revenue": 524803.73
+    },
+    {
+      "region": "Lagos",
+      "revenue": 493481.24
+    },
+    {
+      "region": "Edmonton",
+      "revenue": 469766.89
+    },
+    {
+      "region": "Calgary",
+      "revenue": 467885.98
+    },
+    {
+      "region": "Accra",
+      "revenue": 462401.18
+    },
+    {
+      "region": "Abuja",
+      "revenue": 448934.37
+    }
+  ],
+  "trend": [
+    {
+      "month": "Jan",
+      "revenue": 238306.74
+    },
+    {
+      "month": "Feb",
+      "revenue": 221137.51
+    },
+    {
+      "month": "Mar",
+      "revenue": 204283.76
+    },
+    {
+      "month": "Apr",
+      "revenue": 242196.53
+    },
+    {
+      "month": "May",
+      "revenue": 249166.67
+    },
+    {
+      "month": "Jun",
+      "revenue": 274592.25
+    },
+    {
+      "month": "Jul",
+      "revenue": 203052.29
+    },
+    {
+      "month": "Aug",
+      "revenue": 287813.48
+    },
+    {
+      "month": "Sep",
+      "revenue": 232785.09
+    },
+    {
+      "month": "Oct",
+      "revenue": 232067.44
+    },
+    {
+      "month": "Nov",
+      "revenue": 216087.6
+    },
+    {
+      "month": "Dec",
+      "revenue": 265784.03
+    }
+  ],
+  "category": [
+    {
+      "category": "Clothing",
+      "revenue": 601484.21
+    },
+    {
+      "category": "Beauty",
+      "revenue": 597637.96
+    },
+    {
+      "category": "Home",
+      "revenue": 558749.47
+    },
+    {
+      "category": "Groceries",
+      "revenue": 558241.21
+    },
+    {
+      "category": "Electronics",
+      "revenue": 551160.54
+    }
+  ],
+  "region_category": {
+    "regions": [
+      "Abuja",
+      "Accra",
+      "Calgary",
+      "Edmonton",
+      "Kumasi",
+      "Lagos"
+    ],
+    "categories": [
+      "Beauty",
+      "Clothing",
+      "Electronics",
+      "Groceries",
+      "Home"
+    ],
+    "values": [
+      [
+        91297.34,
+        110622.94,
+        93871.3,
+        70482.77,
+        82660.02
+      ],
+      [
+        117950.5,
+        84468.32,
+        99567.65,
+        77500.5,
+        82914.21
+      ],
+      [
+        91837.61,
+        94092.68,
+        73998.75,
+        118943.51,
+        89013.43
+      ],
+      [
+        99288.22,
+        105140.88,
+        89272.16,
+        87622.25,
+        88443.38
+      ],
+      [
+        81886.28,
+        116651.14,
+        106032.95,
+        107526.42,
+        112706.94
+      ],
+      [
+        115378.01,
+        90508.25,
+        88417.73,
+        96165.76,
+        103011.49
+      ]
+    ]
+  },
+  "top_category_per_region": {
+    "Abuja": {
+      "category": "Clothing",
+      "revenue": 110622.94
+    },
+    "Accra": {
+      "category": "Beauty",
+      "revenue": 117950.5
+    },
+    "Calgary": {
+      "category": "Groceries",
+      "revenue": 118943.51
+    },
+    "Edmonton": {
+      "category": "Clothing",
+      "revenue": 105140.88
+    },
+    "Kumasi": {
+      "category": "Clothing",
+      "revenue": 116651.14
+    },
+    "Lagos": {
+      "category": "Beauty",
+      "revenue": 115378.01
+    }
+  }
+}
