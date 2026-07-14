@@ -2,11 +2,16 @@
 
 End-to-end analysis of a cross-continental retail operation's 2025 order data:
 **data quality auditing → cleaning → exploratory analysis → customer
-concentration → an interactive dashboard**, with business recommendations drawn
-from each step.
+concentration → an interactive dashboard → a formatted Excel management
+report**, with business recommendations drawn from each step.
 
 The business spans **six markets on two continents** — four West African cities
 (Lagos, Abuja, Accra, Kumasi) and two Canadian (Edmonton, Calgary).
+
+The dataset is also loaded into a **SQLite database** (`retail.db`) for SQL
+exploration, and the project ships an **Excel management report**
+(`management_report.xlsx`) with an executive dashboard and a full data-quality
+audit trail. See [§7](#7-excel-management-report) and [§8](#8-sql-exploration--tooling).
 
 ---
 
@@ -27,33 +32,54 @@ The business spans **six markets on two continents** — four West African citie
 ```
 retail-sales-2025-analysis/
 ├── retail_sales_2025.csv / .xlsx   # raw data (source of truth, never modified)
+├── retail.db                       # SQLite mirror (gitignored; rebuild via load_sqlite.py)
 ├── clean/
-│   └── retail_sales_clean.csv      # cleaned dataset (1,970 rows)
+│   ├── retail_sales_clean.csv      # cleaned dataset — original pipeline (1,970 rows)
+│   ├── retail_sales_2025_clean.csv # cleaned dataset — SQL/Excel pipeline (1,970 rows)
+│   └── cleaning_audit.csv          # per-step audit trail (feeds the Data Quality sheet)
 ├── scripts/
 │   ├── quality_report.py           # data quality audit
-│   ├── clean_data.py               # cleaning pipeline -> clean/
+│   ├── clean_data.py               # cleaning pipeline -> clean/retail_sales_clean.csv
 │   ├── analysis.py                 # region / monthly / category analysis + PNGs
 │   ├── export_dashboard_data.py    # aggregates -> charts/dashboard_data.json
 │   ├── customer_concentration.py   # top customers + concentration
-│   └── verify_accra.py             # two-method cross-check example
+│   ├── verify_accra.py             # two-method cross-check example
+│   ├── load_sqlite.py              # load the raw CSV into retail.db
+│   ├── sql_queries.py              # analytical SQL against retail.db
+│   ├── customer_region_check.py    # checks customer_id -> region uniqueness
+│   ├── clean_retail_sales.py       # cleaning + audit trail -> clean/ (SQL/Excel pipeline)
+│   ├── build_management_report.py  # Summary / By Region / Monthly sheets
+│   └── build_dashboards.py         # rebuilds the workbook + Dashboard & Data Quality sheets
 ├── charts/
 │   ├── revenue_by_region.png
 │   ├── monthly_revenue_trend.png
+│   ├── retail_sales_dashboard2.png # screenshot of the Excel executive dashboard
 │   └── dashboard_data.json
-├── dashboard.html                  # interactive dashboard (open in a browser)
+├── dashboard.html                  # interactive HTML dashboard (open in a browser)
+├── management_report.xlsx          # Excel report: Dashboard + detail + Data Quality
+├── .mcp.json                       # MCP servers: sqlite, excel, powerbi
+├── .claude/agents/data-engineer.md # project data-engineer agent
 ├── CLAUDE.md                       # working rules for this project
 └── README.md
 ```
 
 ### Reproduce everything
 ```bash
+# Original analysis pipeline (pandas + matplotlib + HTML dashboard)
 python scripts/quality_report.py          # 1. audit the raw data
 python scripts/clean_data.py              # 2. write clean/retail_sales_clean.csv
 python scripts/analysis.py                # 3. tables + charts/*.png
 python scripts/export_dashboard_data.py   # 4. dashboard data
 python scripts/customer_concentration.py  # 5. customer analysis
+
+# SQL + Excel pipeline
+python scripts/load_sqlite.py             # 6. load raw CSV -> retail.db
+python scripts/sql_queries.py             # 7. analytical SQL against retail.db
+python scripts/clean_retail_sales.py      # 8. clean + emit clean/cleaning_audit.csv
+python scripts/build_dashboards.py        # 9. build management_report.xlsx (all sheets)
 ```
-Requires Python 3 with `pandas` and `matplotlib`.
+Requires Python 3 with `pandas`, `matplotlib`, and `openpyxl`. Close
+`management_report.xlsx` in Excel before rerunning step 9 (an open file locks it).
 
 ---
 
@@ -163,6 +189,75 @@ split above. Open it in any browser — no server or dependencies required.
 
 ---
 
+## 7. Excel management report
+
+`management_report.xlsx` is a formatted, five-sheet workbook built with
+`openpyxl` (`scripts/build_dashboards.py`). It opens on an **executive
+dashboard**:
+
+![Excel executive dashboard](charts/retail_sales_dashboard2.png)
+
+| Sheet | Contents |
+|---|---|
+| **Dashboard** | KPI cards + four charts: revenue by region, category share, monthly trend, category mix by region |
+| **Summary** | Total revenue, order count, average order value |
+| **By Region** | Region × category revenue pivot with totals; top region highlighted |
+| **Monthly** | Monthly revenue with an embedded line chart |
+| **Data Quality** | Full cleaning audit trail (below) |
+
+Chart colors use the validated colorblind-safe categorical palette; the workbook
+is rebuilt from the cleaned data on every run so the charts never drift.
+
+### Data Quality sheet — an auditable trail
+
+Every cleaning action and the rows it affected are recorded so an auditor can
+trace `raw → clean`. The counts come straight from the cleaning run
+(`scripts/clean_retail_sales.py` → `clean/cleaning_audit.csv`), so the sheet
+cannot drift from what actually executed:
+
+| Step | Action | Rows in | Affected | Rows out |
+|---|---|---|---|---|
+| 1 | Load raw dataset | — | — | 2,025 |
+| 2 | Remove duplicate orders | 2,025 | 25 | 2,000 |
+| 3 | Standardize region labels | 2,000 | 40 | 2,000 |
+| 4 | Remove return rows | 2,000 | 30 | 1,970 |
+| 5 | Impute missing unit prices | 1,970 | 59 | 1,970 |
+| 6 | Recalculate revenue | 1,970 | 59 | 1,970 |
+| 7 | Final validated dataset | 1,970 | — | 1,970 |
+
+**Reconciliation:** 2,025 raw − 25 duplicates − 30 returns = **1,970 clean rows**.
+
+> **Note on the two clean files.** This SQL/Excel pipeline
+> (`clean_retail_sales.py`) imputes missing prices at the **global** median
+> ($244.71) and reports counts in true execution order — dedupe runs first, so
+> region fixes show **40** (not 41) and imputations **59** (not 61). The original
+> `clean_data.py` uses a **category** median. Both yield 1,970 rows; totals differ
+> by ~$50 out of $2.87M — immaterial, but documented for traceability.
+
+---
+
+## 8. SQL exploration & tooling
+
+The cleaned data is mirrored into **`retail.db`** (SQLite) for ad-hoc SQL.
+`scripts/sql_queries.py` holds the analytical queries; for example, **top 5
+regions by average order value** (summed per order, then averaged):
+
+| Region | Avg order value |
+|---|---|
+| Kumasi | $1,552.67 |
+| Abuja | $1,491.48 |
+| Edmonton | $1,472.62 |
+| Accra | $1,440.50 |
+| Lagos | $1,426.25 |
+
+**MCP servers** (`.mcp.json`) wire three tools into the workflow: `sqlite`
+(query `retail.db`), `excel` (read/write workbooks), and `powerbi` (Power BI
+semantic-model work). A project **data-engineer agent**
+(`.claude/agents/data-engineer.md`) encodes the working rules and this dataset's
+quirks (returns, the `' calgary'` fix, order-level grain).
+
+---
+
 ## Key insights
 
 1. **No region carries the business.** Revenue is spread within a 17% band across
@@ -222,3 +317,9 @@ cleaning each cycle.
 - Every reported figure is produced by a **rerunnable script** in `scripts/` for
   independent verification (e.g. `verify_accra.py` cross-checks a figure two ways).
 - Category colors in the charts and dashboard are validated colorblind-safe.
+- The Excel report's numbers are **audit-traceable**: the Data Quality sheet is
+  generated from the same cleaning run that produces the data, not typed by hand.
+- `retail.db` is **generated** (gitignored); rebuild it with
+  `python scripts/load_sqlite.py`. Local Claude settings
+  (`.claude/settings.local.json`) are also gitignored; shared project config
+  (`.mcp.json`, `.claude/agents/`) is tracked.
