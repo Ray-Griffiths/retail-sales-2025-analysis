@@ -1,0 +1,8 @@
+step,action,basis,rows_in,rows_affected,rows_out,detail
+1,Load raw dataset,source,,,2025,Read retail_sales_2025.xlsx (sheet 'sales')
+2,Remove duplicate orders,dedupe,2025,25,2000,Dropped rows with a repeated order_id; kept first occurrence
+3,Standardize region labels,fix regions,2000,40,2000,Trim whitespace + Title Case; ' calgary' -> 'Calgary' (row count unchanged)
+4,Remove return rows,drop negative quantities,2000,30,1970,Removed rows with quantity < 0 (product returns)
+5,Impute missing unit prices,median-impute prices,1970,59,1970,Filled 59 null unit_price ($) with median = 244.71
+6,Recalculate revenue,recalc revenue,1970,59,1970,revenue = quantity x unit_price; 59 rows changed (incl. previously null)
+7,Final validated dataset,output,1970,,1970,"1970 clean rows; nulls remaining = 0; regions = ['Abuja', 'Accra', 'Calgary', 'Edmonton', 'Kumasi', 'Lagos']"

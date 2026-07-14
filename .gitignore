@@ -18,9 +18,25 @@ Thumbs.db
 scratch/
 tmp/
 
+# Office lock / temp files (e.g. ~$management_report.xlsx while open in Excel)
+~$*
+
+# Databases — generated from the raw CSV via scripts/load_sqlite.py, not a source
+*.db
+*.db-wal
+*.db-shm
+
+# Claude Code — local, machine-specific settings (permissions, enabled MCP servers).
+# Shared project config (.claude/agents/, .claude/settings.json, .mcp.json) IS tracked.
+.claude/settings.local.json
+
 # Notes:
 # - Raw data (retail_sales_2025.*) IS tracked as the source of truth.
 # - clean/ and charts/ are tracked as deliverables (reproducible via scripts/).
 #   If you'd rather regenerate them and keep them out of git, uncomment:
 # clean/
 # charts/
+# - retail.db is ignored (regenerate with: python scripts/load_sqlite.py).
+# - management_report.xlsx IS tracked as the key deliverable; to keep the binary
+#   out of git and regenerate it instead, uncomment:
+# management_report.xlsx

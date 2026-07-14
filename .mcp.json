@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "sqlite": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-server-sqlite-npx",
+        "C:\\Users\\PC\\Desktop\\DataAnalytics\\retail.db"
+      ]
+    },
+    "excel": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@negokaz/excel-mcp-server"
+      ],
+      "env": {
+        "EXCEL_MCP_PAGING_CELLS_LIMIT": "4000"
+      }
+    },
+    "powerbi": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@microsoft/powerbi-modeling-mcp",
+        "--start"
+      ]
+    }
+  }
+}
